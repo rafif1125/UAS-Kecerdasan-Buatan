@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expert System + KNN Pinus</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #e6f0ef; }
+        .container { width: 440px; margin: 60px auto; padding: 25px; background: white; border-radius: 12px; box-shadow: 0 2px 10px #b8cccc; }
+        h2 { text-align: center; color: #22765a; }
+        input[type=number], input[type=file] { width: 90%; padding: 10px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid #ccc; }
+        button { width: 100%; padding: 10px; background: #22765a; color: white; border: none; border-radius: 5px; font-size: 1em; }
+        .result { margin-top: 30px; padding: 10px 0; border-top: 1px solid #dde5e2; }
+        .match { color: #16a34a; }
+        .nomatch { color: #d92929; }
+        .tab { margin-bottom: 20px; }
+        .preview { margin: 12px 0; text-align:center;}
+        img { max-width: 180px; max-height: 180px; border-radius: 8px; border:1px solid #bbb;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Prediksi Jenis Pinus<br>(Expert System + KNN + Vision)</h2>
+    <form method="post" enctype="multipart/form-data">
+        <div class="tab">
+            <label><input type="radio" name="method" value="manual" {% if method == 'manual' %}checked{% endif %}> Input Manual</label>
+            &nbsp;&nbsp;
+            <label><input type="radio" name="method" value="vision" {% if method == 'vision' %}checked{% endif %}> Input dari Vision</label>
+        </div>
+        <div id="manual_form" {% if method != 'manual' %}style="display:none;"{% endif %}>
+            <label>Diameter Batang (meter):</label><br>
+            <input type="number" step="0.01" name="diameter" placeholder="Contoh: 0.32" {% if method == 'manual' %}required{% endif %}><br>
+            <label>Tinggi Pohon (meter):</label><br>
+            <input type="number" step="0.01" name="tinggi" placeholder="Contoh: 25.5" {% if method == 'manual' %}required{% endif %}><br>
+        </div>
+        <div id="vision_form" {% if method != 'vision' %}style="display:none;"{% endif %}>
+            <label>Upload Gambar Pohon:</label><br>
+            <input type="file" name="image" accept="image/*"><br>
+            <div class="preview" id="preview-box" style="display:none;">
+                <img id="preview-img" src="#" alt="Preview Gambar Pohon" />
+            </div>
+            <label>Diameter (hasil deteksi vision):</label><br>
+            <input type="number" step="0.01" name="vision_diameter" placeholder="Misal 0.32"><br>
+            <label>Tinggi (hasil deteksi vision):</label><br>
+            <input type="number" step="0.01" name="vision_tinggi" placeholder="Misal 25.5"><br>
+            <small><i>(input manual seolah-olah hasil deteksi gambar)</i></small>
+        </div>
+        <button type="submit">Prediksi</button>
+    </form>
+    {% if image_url %}
+    <div class="preview">
+        <b>Gambar yang diupload:</b><br>
+        <img src="{{ image_url }}" alt="Preview Gambar Pinus">
+    </div>
+    {% endif %}
+    {% if result %}
+    <div class="result">
+        {% if result.error %}
+            <b style="color:red;">Terjadi Kesalahan:</b> {{ result.error }}
+        {% else %}
+            <b>Diameter:</b> {{ result.diameter }} meter<br>
+            <b>Tinggi:</b> {{ result.tinggi }} meter<br>
+            <hr>
+            <b>Sistem Pakar:</b> {{ result.pakar_pred }} <br>
+            <b>Certainty Factor:</b> {{ result.cf }}<br>
+            <b>KNN:</b> {{ result.knn_pred }}<br>
+            <b>Penilaian Kebenaran:</b>
+            {% if result.cocok %}
+                <span class="match">Cocok (Nilai Kebenaran = {{ result.nilai_kebenaran }})</span>
+            {% else %}
+                <span class="nomatch">Tidak Cocok (Nilai Kebenaran = 0)</span>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+<script>
+    // JS untuk show/hide form
+const radios = document.getElementsByName('method');
+function updateForm() {
+    var manualForm = document.getElementById('manual_form');
+    var visionForm = document.getElementById('vision_form');
+    manualForm.style.display = radios[0].checked ? '' : 'none';
+    visionForm.style.display = radios[1].checked ? '' : 'none';
+
+    // Atur required hanya pada input yang tampil
+    document.getElementsByName('diameter')[0].required = radios[0].checked;
+    document.getElementsByName('tinggi')[0].required = radios[0].checked;
+    document.getElementsByName('vision_diameter')[0].required = radios[1].checked;
+    document.getElementsByName('vision_tinggi')[0].required = radios[1].checked;
+}
+radios[0].addEventListener('change', updateForm);
+radios[1].addEventListener('change', updateForm);
+window.onload = updateForm;
+
+</script>
+</body>
+</html>
