@@ -45,7 +45,7 @@ X = [[d[0], d[1]] for d in data]
 y = [d[2] for d in data]
 
 # Melatih model KNN pada semua data ok
-knn = KNeighborsClassifier(n_neighbors=3)
+knn = KNeighborsClassifier(n_neighbors=11)
 knn.fit(X, y)
 
 # COMPUTER VISION MODULE (DUMMY, USER INPUT) SOAL NO 10
